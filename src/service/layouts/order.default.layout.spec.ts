@@ -1,4 +1,4 @@
-import { OrderDefaultLayout } from "@src/service/layouts/order.default.layout";
+import { OrderDefaultLayout } from '@src/service/layouts/order.default.layout'
 
 describe('OrderDefaultLayout', () => {
     describe('from', () => {
@@ -12,6 +12,6 @@ describe('OrderDefaultLayout', () => {
             expect(order.prodId).toBe(3)
             expect(order.value).toBe(1836.74)
             expect(order.date.toISOString()).toBe(new Date(2021, 2, 8).toISOString())
-        });
-    });
-});
+        })
+    })
+})
