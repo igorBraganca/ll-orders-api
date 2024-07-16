@@ -3,8 +3,15 @@ export class OrderDefaultLayout {
     userName: string
     orderId: number
     prodId: number
-    value: string
-    date: string
+    value: number
+    date: Date
+
+    private parseDate(txtDate: string) {
+        const year = Number(txtDate.substring(0, 4))
+        const month = Number(txtDate.substring(4, 6))
+        const day = Number(txtDate.substring(6, 8))
+        return new Date(year, month - 1, day, 0, 0, 0, 0)
+    }
 
     // campo tamanho tipo
     // id usuário - 10 - numérico
@@ -23,16 +30,21 @@ export class OrderDefaultLayout {
         o.userName = line.substring(10, 55).trim()
         o.orderId = Number(line.substring(55, 65))
         o.prodId = Number(line.substring(65, 75))
-        o.value = line.substring(75, 87).trim()
-        o.date = OrderDefaultLayout.formatDate(line.substring(87).trim())
+        o.value = Number(line.substring(75, 87).trim())
+        o.date = o.parseDate(line.substring(87).trim())
         return o
     }
 
-    static formatDate(txtDate: string) {
-        const year = txtDate.substring(0, 4)
-        const month = txtDate.substring(4, 6)
-        const day = txtDate.substring(6, 8)
-        return `${year}-${month}-${day}`
+    static sort(a: OrderDefaultLayout, b: OrderDefaultLayout) {
+        if (a.userId === b.userId && a.orderId === b.orderId && a.prodId === b.prodId) {
+            return a.value - b.value
+        }
+        if (a.userId === b.userId && a.orderId === b.orderId) {
+            return a.prodId - b.prodId
+        }
+        if (a.userId === b.userId) {
+            return a.orderId - b.orderId
+        }
+        return a.userId - b.userId
     }
-
 }

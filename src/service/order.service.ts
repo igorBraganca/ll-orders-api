@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { OrderDefaultLayout } from './layouts/order.default.layout';
+import { Order } from '@src/@types/order';
+import { Product } from '@src/@types/product';
+import { User } from '@src/@types/user';
+import { OrderDefaultLayout } from '@src/service/layouts/order.default.layout';
+
 
 @Injectable()
 export class OrderService {
@@ -10,15 +14,7 @@ export class OrderService {
     }
 
     normalize(rows: OrderDefaultLayout[]): User[] {
-        const sortedOrders = rows.sort((a, b) => {
-            if (a.userId === b.userId && a.orderId === b.orderId) {
-                return a.prodId - b.prodId
-            }
-            if (a.userId === b.userId) {
-                return a.orderId - b.orderId
-            }
-            return a.userId - b.userId
-        })
+        const sortedOrders = rows.sort(OrderDefaultLayout.sort)
 
         const users: any = {}
         for (const order of sortedOrders) {
@@ -48,35 +44,11 @@ export class OrderService {
 
         return Object.values(users).map((u: any) => {
             const orders = Object.values(u.orders).map((o: any) => {
-                const total = o.products.reduce((acc: number, curr: Product) => acc + Number(curr.value), 0)
-                return {
-                    ...o,
-                    total
-                }
+                const products = o.products.map((p: any) => new Product(p.id, p.value))
+                return new Order(o.id, o.date, products)
             })
-
-            return {
-                ...u,
-                orders
-            }
+            return new User(u.id, u.name, orders)
         })
     }
 }
 
-export interface User {
-    id: number
-    name: string
-    orders: Order[]
-}
-
-export interface Order {
-    id: number
-    total: string
-    date: string
-    products: Product[]
-}
-
-export interface Product {
-    id: number
-    value: string
-}

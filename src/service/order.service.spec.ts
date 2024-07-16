@@ -1,5 +1,5 @@
+import { OrderService } from "@src/service/order.service";
 import { readFileSync } from "fs";
-import { OrderService } from "./order.service";
 
 function makeSut() {
     const sut = new OrderService()
@@ -22,8 +22,8 @@ describe('OrderService', () => {
             expect(firstLine.userName).toBe('Palmer Prosacco')
             expect(firstLine.orderId).toBe(753)
             expect(firstLine.prodId).toBe(3)
-            expect(firstLine.value).toBe('1836.74')
-            expect(firstLine.date).toBe('2021-03-08')
+            expect(firstLine.value).toBe(1836.74)
+            expect(firstLine.date).toStrictEqual(new Date(2021, 2, 8))
         });
     });
 
@@ -44,12 +44,18 @@ describe('OrderService', () => {
 
             const firstOrder = firstUser.orders[0]
             expect(firstOrder.id).toBe(2)
-            expect(firstOrder.date).toBe('2021-10-28')
+            expect(firstOrder.date).toStrictEqual(new Date(2021, 9, 28))
             expect(firstOrder.total).toBe(2966.46)
             expect(firstOrder.products.length).toBe(3)
             expect(firstOrder.products[0].id).toBe(2)
+            expect(firstOrder.products[0].value).toBe(601.43)
             expect(firstOrder.products[1].id).toBe(2)
+            expect(firstOrder.products[1].value).toBe(798.03)
             expect(firstOrder.products[2].id).toBe(5)
+            expect(firstOrder.products[2].value).toBe(1567.00)
         });
     });
 });
+
+
+

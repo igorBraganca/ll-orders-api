@@ -1,4 +1,4 @@
-import { OrderDefaultLayout } from "./order.default.layout";
+import { OrderDefaultLayout } from "@src/service/layouts/order.default.layout";
 
 describe('OrderDefaultLayout', () => {
     describe('from', () => {
@@ -10,15 +10,8 @@ describe('OrderDefaultLayout', () => {
             expect(order.userName).toBe('Palmer Prosacco')
             expect(order.orderId).toBe(753)
             expect(order.prodId).toBe(3)
-            expect(order.value).toBe('1836.74')
-            expect(order.date).toBe('2021-03-08')
+            expect(order.value).toBe(1836.74)
+            expect(order.date).toStrictEqual(new Date(2021, 2, 8))
         });
     });
-
-    describe('formatDate', () => {
-        it('should return date in format yyyy-mm-dd', () => {
-            const date = OrderDefaultLayout.formatDate('20210308')
-            expect(date).toBe('2021-03-08')
-        })
-    })
 });
