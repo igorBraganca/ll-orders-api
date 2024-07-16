@@ -23,7 +23,7 @@ describe('OrderService', () => {
             expect(firstLine.orderId).toBe(753)
             expect(firstLine.prodId).toBe(3)
             expect(firstLine.value).toBe(1836.74)
-            expect(firstLine.date).toStrictEqual(new Date(2021, 2, 8))
+            expect(firstLine.date.toISOString()).toBe(new Date(2021, 2, 8).toISOString())
         });
     });
 
@@ -44,7 +44,7 @@ describe('OrderService', () => {
 
             const firstOrder = firstUser.orders[0]
             expect(firstOrder.id).toBe(2)
-            expect(firstOrder.date).toStrictEqual(new Date(2021, 9, 28))
+            expect(firstOrder.date.toISOString()).toBe(new Date(2021, 9, 28).toISOString())
             expect(firstOrder.total).toBe(2966.46)
             expect(firstOrder.products.length).toBe(3)
             expect(firstOrder.products[0].id).toBe(2)

@@ -11,7 +11,7 @@ describe('OrderDefaultLayout', () => {
             expect(order.orderId).toBe(753)
             expect(order.prodId).toBe(3)
             expect(order.value).toBe(1836.74)
-            expect(order.date).toStrictEqual(new Date(2021, 2, 8))
+            expect(order.date.toISOString()).toBe(new Date(2021, 2, 8).toISOString())
         });
     });
 });
