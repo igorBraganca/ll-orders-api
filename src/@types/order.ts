@@ -33,7 +33,7 @@ export class OrderDTO {
         const year = d.getFullYear();
         const month = d.getMonth();
         const day = d.getDate();
-        return `${year}-${month + 1}-${day}`
+        return `${String(year).padStart(4, '0')}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     }
 
     static fromOrder(order: Order) {
