@@ -49,4 +49,16 @@ describe('ParseOrdersController (e2e)', () => {
         expect(firstOrder.products[2].product_id).toBe(5)
         expect(firstOrder.products[2].value).toBe('1567.00')
     })
+
+    it('/orders/upload (POST) error', async () => {
+        const response = await request(app.getHttpServer())
+            .post('/orders/upload')
+
+        expect(response.statusCode).toBe(400)
+        expect(response.body).toStrictEqual({
+            error: {
+                message: 'orders is required'
+            }
+        })
+    })
 })

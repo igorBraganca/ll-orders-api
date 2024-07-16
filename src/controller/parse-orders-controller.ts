@@ -11,7 +11,11 @@ export class ParseOrdersController {
     @UseInterceptors(FileInterceptor('orders'))
     async upload(@UploadedFile() orders: Express.Multer.File, @Res() response: Response) {
         if (!orders) {
-            response.status(HttpStatus.BAD_REQUEST).send('orders is required')
+            response.status(HttpStatus.BAD_REQUEST).send({
+                error: {
+                    message: 'orders is required'
+                }
+            })
             return
         }
 
