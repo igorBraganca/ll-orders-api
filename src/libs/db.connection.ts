@@ -30,7 +30,7 @@ export class DBConnection {
     }
 
     async query(fn: (k: Knex) => {}, identification = 'undefined'): Promise<any> {
-        this.logger.log(`DBConnection.query :: running query ${fn(this.currentConnection).toString()}`)
+        this.logger.debug(`DBConnection.query :: running query ${fn(this.currentConnection).toString()}`)
         const t0 = performance.now()
         const result = fn(this.currentConnection)
         const t1 = performance.now()
