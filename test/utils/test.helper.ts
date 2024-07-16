@@ -3,7 +3,7 @@ import { DBConnection } from "@src/libs/db.connection";
 export class TestHelper {
     static async cleanDatabase(conn: DBConnection) {
         const tables = [
-            'products',
+            'order_product',
             'orders',
             'users'
         ]

@@ -29,13 +29,20 @@ export class OrderRepository {
         }, 'OrderRepository.insertOrUpdateOrders')
     }
 
-    async insertOrUpdateProducts(products: { id: number, value: number, orderId: number }[]) {
+    async insertOrUpdateProducts(products: { productId: number, value: number, orderId: number }[]) {
         this.logger.debug(`OrderRepository.insertOrUpdateProducts :: inserindo ${products.length} usuários`)
         await this.conn.query((knex) => {
-            return knex('products')
+            return knex('order_product')
                 .insert(products)
-                .onConflict('id')
-                .merge()
         }, 'OrderRepository.insertOrUpdateProducts')
+    }
+
+    async deleteProductsByOrders(ordersId:number[]) {
+        this.logger.debug(`OrderRepository.deleteProductsByOrders :: deletando produtos para pedidos ${JSON.stringify(ordersId)}`)
+        await this.conn.query((knex) => {
+            return knex('order_product')
+                .delete()
+                .whereIn('orderId', ordersId)
+        }, 'OrderRepository.deleteProductsByOrders')    
     }
 }

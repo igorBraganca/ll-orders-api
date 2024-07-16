@@ -14,7 +14,7 @@ beforeEach(async () => {
         providers: [OrderRepository],
     }).compile()
 
-    module.useLogger(new ConsoleLogger());
+    // module.useLogger(new ConsoleLogger());
 
     sut = module.get<OrderRepository>(OrderRepository)
     conn = module.get<DBConnection>('DEFAULT_CONN')
@@ -88,28 +88,41 @@ describe('OrderRepository', () => {
             const [idOrder] = await conn.query(knex => knex('orders').insert({ id: 1, date: '2020-01-01', userId: idUser }), 'OrderRepository.insertOrUpdateProducts.test')
 
             const products = [
-                { id: 1, value: 1.11, orderId: idOrder },
-                { id: 2, value: 2.22, orderId: idOrder },
-                { id: 3, value: 3.33, orderId: idOrder },
+                { productId: 1, value: 1.11, orderId: idOrder },
+                { productId: 2, value: 2.22, orderId: idOrder },
+                { productId: 3, value: 3.33, orderId: idOrder },
             ]
 
             await sut.insertOrUpdateProducts(products)
 
-            const queryResult = await conn.query(knex => knex('products'), 'OrderRepository.insertOrUpdateProducts.test')
+            const queryResult = await conn.query(knex => knex('order_product'), 'OrderRepository.insertOrUpdateProducts.test')
             expect(queryResult.length).toBe(3)
-            expect(queryResult[0].id).toBe(1)
+            expect(queryResult[0].productId).toBe(1)
             expect(queryResult[0].orderId).toBe(idOrder)
             expect(queryResult[0].value).toBe(1.11)
             expect(queryResult[1].value).toBe(2.22)
             expect(queryResult[2].value).toBe(3.33)
+        })
+    })
 
-            const mergeProduct = [{ id: 1, value: 9.99, orderId: idOrder }]
+    describe('deleteProductsByOrders', () => {
+        it('should delete all products', async () => {
+            const [idUser] = await conn.query(knex => knex('users').insert({ id: 1, name: 'teste_1' }), 'OrderRepository.deleteProductsByOrders.test')
+            const [idOrder1] = await conn.query(knex => knex('orders').insert({ id: 1, date: '2020-01-01', userId: idUser }), 'OrderRepository.deleteProductsByOrders.test')
+            const [idOrder2] = await conn.query(knex => knex('orders').insert({ id: 2, date: '2020-01-01', userId: idUser }), 'OrderRepository.deleteProductsByOrders.test')
+            await conn.query(knex => knex('order_product').insert([
+                { productId: 1, value: 1.11, orderId: idOrder1 },
+                { productId: 2, value: 2.22, orderId: idOrder2 },
+                { productId: 3, value: 3.33, orderId: idOrder1 },
+            ]), 'OrderRepository.deleteProductsByOrders.test')
 
-            await sut.insertOrUpdateProducts(mergeProduct)
+            await sut.deleteProductsByOrders([idOrder1])
 
-            const mergedResult = await conn.query(knex => knex('products').where('id', 1).first(), 'OrderRepository.insertOrUpdateProducts.test')
-            expect(mergedResult.id).toBe(1)
-            expect(mergedResult.value).toBe(9.99)
+            const queryResult1 = await conn.query(knex => knex('order_product').where('orderId', idOrder1), 'OrderRepository.insertOrUpdateProducts.test')
+            expect(queryResult1.length).toBe(0)
+
+            const queryResult2 = await conn.query(knex => knex('order_product').where('orderId', idOrder2), 'OrderRepository.insertOrUpdateProducts.test')
+            expect(queryResult2.length).toBe(1)
         })
     })
 })
