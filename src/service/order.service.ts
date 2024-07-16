@@ -95,4 +95,31 @@ export class OrderService {
 
         return order.toDTO()
     }
+
+    async filterOrders(filters: { orderId?: number, startDate?: Date, endDate?: Date } = {}) {
+        const result = await this.orderRepository.findOrders(filters)
+        if (result.length === 0) {
+            return
+        }
+
+        const orders: Order[] = []
+        let currentUser = new User(result[0].userId, result[0].userName)
+        let currentOrder = new Order(result[0].orderId, result[0].orderDate)
+        currentOrder.user = currentUser
+
+        for (const row of result) {
+            if (currentOrder.id != row.orderId) {
+                orders.push(currentOrder)
+
+                currentUser = new User(row.userId, row.userName)
+                currentOrder = new Order(row.orderId, row.orderDate)
+                currentOrder.user = currentUser
+            }
+
+            currentOrder.addProducts(new Product(row.productId, row.productValue))
+        }
+        orders.push(currentOrder)
+
+        return orders.map(o => o.toDTO())
+    }
 }

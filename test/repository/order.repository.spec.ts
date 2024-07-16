@@ -6,8 +6,8 @@ import { OrderRepository } from "@src/repository/order.repository";
 import { TestHelper } from "@test/utils/test.helper";
 import { Knex } from "knex";
 
-let sut = null
-let conn = null
+let sut: OrderRepository
+let conn: DBConnection
 
 beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -58,9 +58,9 @@ describe('OrderRepository', () => {
             const [idUser] = await conn.query((knex: Knex) => knex('users').insert({ id: 1, name: 'teste_1' }), 'OrderRepository.insertOrUpdateOrders.test')
 
             const orders = [
-                { id: 1, date: '2020-01-01', userId: idUser },
-                { id: 2, date: '2020-01-02', userId: idUser },
-                { id: 3, date: '2020-01-03', userId: idUser },
+                { id: 1, date: new Date('2020-01-01'), userId: idUser },
+                { id: 2, date: new Date('2020-01-02'), userId: idUser },
+                { id: 3, date: new Date('2020-01-03'), userId: idUser },
             ]
 
             await sut.insertOrUpdateOrders(orders)
@@ -69,17 +69,17 @@ describe('OrderRepository', () => {
             expect(queryResult.length).toBe(3)
             expect(queryResult[0].id).toBe(1)
             expect(queryResult[0].userId).toBe(idUser)
-            expect(queryResult[0].date).toStrictEqual(new Date(2020, 0, 1))
-            expect(queryResult[1].date).toStrictEqual(new Date(2020, 0, 2))
-            expect(queryResult[2].date).toStrictEqual(new Date(2020, 0, 3))
+            expect(queryResult[0].date).toStrictEqual(new Date('2020-01-01'))
+            expect(queryResult[1].date).toStrictEqual(new Date('2020-01-02'))
+            expect(queryResult[2].date).toStrictEqual(new Date('2020-01-03'))
 
-            const mergeOrders = [{ id: 1, date: '2020-01-09', userId: idUser }]
+            const mergeOrders = [{ id: 1, date: new Date('2020-01-09'), userId: idUser }]
 
             await sut.insertOrUpdateOrders(mergeOrders)
 
             const mergedResult = await conn.query((knex: Knex) => knex('orders').where('id', 1).first(), 'OrderRepository.insertOrUpdateOrders.test')
             expect(mergedResult.id).toBe(1)
-            expect(mergedResult.date).toStrictEqual(new Date(2020, 0, 9))
+            expect(mergedResult.date).toStrictEqual(new Date('2020-01-09'))
         })
     })
 
@@ -149,6 +149,92 @@ describe('OrderRepository', () => {
             expect(result[0].productValue).toBe(1.11)
             expect(result[1].productId).toBe(3)
             expect(result[1].productValue).toBe(3.33)
+        })
+    })
+
+    describe('findOrders', () => {
+        it('should find by order id', async () => {
+            const [idUser] = await conn.query((knex: Knex) => knex('users').insert({ id: 1, name: 'teste_1' }), 'OrderRepository.findOrders.test')
+            const [idOrder1] = await conn.query((knex: Knex) => knex('orders').insert({ id: 1, date: '2020-01-01', userId: idUser }), 'OrderRepository.findOrders.test')
+            const [idOrder2] = await conn.query((knex: Knex) => knex('orders').insert({ id: 2, date: '2020-01-01', userId: idUser }), 'OrderRepository.findOrders.test')
+            await conn.query((knex: Knex) => knex('order_product').insert([
+                { productId: 1, value: 1.11, orderId: idOrder1 },
+                { productId: 2, value: 2.22, orderId: idOrder2 },
+                { productId: 3, value: 3.33, orderId: idOrder1 },
+            ]), 'OrderRepository.findOrders.test')
+
+            const result = await sut.findOrders({ orderId: idOrder1 })
+
+            expect(result.length).toBe(2)
+            expect(result[0].orderId).toBe(idOrder1)
+            expect(result[0].orderDate).toStrictEqual(new Date(2020, 0, 1))
+            expect(result[0].userId).toBe(idUser)
+            expect(result[0].userName).toBe('teste_1')
+            expect(result[0].productId).toBe(1)
+            expect(result[0].productValue).toBe(1.11)
+            expect(result[1].productId).toBe(3)
+            expect(result[1].productValue).toBe(3.33)
+        })
+
+        it('should find by date', async () => {
+            const [idUser] = await conn.query((knex: Knex) => knex('users').insert({ id: 1, name: 'teste_1' }), 'OrderRepository.findOrders.test')
+            const [idOrder1] = await conn.query((knex: Knex) => knex('orders').insert({ id: 1, date: '2020-01-01', userId: idUser }), 'OrderRepository.findOrders.test')
+            const [idOrder2] = await conn.query((knex: Knex) => knex('orders').insert({ id: 2, date: '2020-01-15', userId: idUser }), 'OrderRepository.findOrders.test')
+            await conn.query((knex: Knex) => knex('order_product').insert([
+                { productId: 1, value: 1.11, orderId: idOrder1 },
+                { productId: 2, value: 2.22, orderId: idOrder2 },
+                { productId: 3, value: 3.33, orderId: idOrder1 },
+            ]), 'OrderRepository.findOrders.test')
+
+            const result = await sut.findOrders({ startDate: new Date('2020-01-14'), endDate: new Date('2020-01-16') })
+
+            expect(result.length).toBe(1)
+            expect(result[0].orderId).toBe(idOrder2)
+            expect(result[0].orderDate).toStrictEqual(new Date(2020, 0, 15))
+            expect(result[0].userId).toBe(idUser)
+            expect(result[0].userName).toBe('teste_1')
+            expect(result[0].productId).toBe(2)
+            expect(result[0].productValue).toBe(2.22)
+        })
+
+        it('should find by date and orderId', async () => {
+            const [idUser] = await conn.query((knex: Knex) => knex('users').insert({ id: 1, name: 'teste_1' }), 'OrderRepository.findOrders.test')
+            const [idOrder1] = await conn.query((knex: Knex) => knex('orders').insert({ id: 1, date: '2020-01-15', userId: idUser }), 'OrderRepository.findOrders.test')
+            const [idOrder2] = await conn.query((knex: Knex) => knex('orders').insert({ id: 2, date: '2020-01-15', userId: idUser }), 'OrderRepository.findOrders.test')
+            await conn.query((knex: Knex) => knex('order_product').insert([
+                { productId: 1, value: 1.11, orderId: idOrder1 },
+                { productId: 2, value: 2.22, orderId: idOrder2 },
+                { productId: 3, value: 3.33, orderId: idOrder1 },
+            ]), 'OrderRepository.findOrders.test')
+
+            const result = await sut.findOrders({ orderId: idOrder2, startDate: new Date('2020-01-14'), endDate: new Date('2020-01-16') })
+
+            expect(result.length).toBe(1)
+            expect(result[0].orderId).toBe(idOrder2)
+            expect(result[0].orderDate).toStrictEqual(new Date(2020, 0, 15))
+            expect(result[0].userId).toBe(idUser)
+            expect(result[0].userName).toBe('teste_1')
+            expect(result[0].productId).toBe(2)
+            expect(result[0].productValue).toBe(2.22)
+        })
+
+        it('should find anything', async () => {
+            const [idUser] = await conn.query((knex: Knex) => knex('users').insert({ id: 1, name: 'teste_1' }), 'OrderRepository.findOrders.test')
+            const [idOrder1] = await conn.query((knex: Knex) => knex('orders').insert({ id: 1, date: '2020-01-15', userId: idUser }), 'OrderRepository.findOrders.test')
+            const [idOrder2] = await conn.query((knex: Knex) => knex('orders').insert({ id: 2, date: '2020-01-15', userId: idUser }), 'OrderRepository.findOrders.test')
+            await conn.query((knex: Knex) => knex('order_product').insert([
+                { productId: 1, value: 1.11, orderId: idOrder1 },
+                { productId: 2, value: 2.22, orderId: idOrder2 },
+                { productId: 3, value: 3.33, orderId: idOrder1 },
+            ]), 'OrderRepository.findOrders.test')
+
+            const result = await sut.findOrders({ orderId: 3, startDate: new Date('2020-01-14'), endDate: new Date('2020-01-16') })
+
+            expect(result.length).toBe(0)
+
+            const result2 = await sut.findOrders({ orderId: idOrder1, startDate: new Date('2022-01-14'), endDate: new Date('2022-01-16') })
+
+            expect(result2.length).toBe(0)
         })
     })
 })

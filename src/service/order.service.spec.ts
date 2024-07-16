@@ -120,4 +120,42 @@ describe('OrderService', () => {
             expect(result).toBeUndefined()
         })
     })
+
+    describe('filterOrders', () => {
+        it('should find an order', async () => {
+            jest.spyOn(orderRepository, 'findOrders').mockResolvedValue([
+                { orderId: 1, orderDate: new Date(2020, 0, 1), userId: 1, userName: 'teste_1', productId: 1, productValue: 1.11 },
+                { orderId: 1, orderDate: new Date(2020, 0, 1), userId: 1, userName: 'teste_1', productId: 2, productValue: 2.22 },
+                { orderId: 1, orderDate: new Date(2020, 0, 1), userId: 1, userName: 'teste_1', productId: 3, productValue: 3.33 },
+                { orderId: 2, orderDate: new Date(2020, 0, 1), userId: 1, userName: 'teste_1', productId: 1, productValue: 11.11 },
+                { orderId: 2, orderDate: new Date(2020, 0, 1), userId: 1, userName: 'teste_1', productId: 2, productValue: 12.22 },
+                { orderId: 2, orderDate: new Date(2020, 0, 1), userId: 1, userName: 'teste_1', productId: 3, productValue: 13.33 },
+            ])
+
+            const result = await sut.filterOrders()
+
+            expect(result.length).toBe(2)
+            expect(result[0].order_id).toBe(1)
+            expect(result[0].date).toBe('2020-01-01')
+            expect(result[0].total).toBe('6.66')
+            expect(result[0].user.user_id).toBe(1)
+            expect(result[0].user.name).toBe('teste_1')
+            expect(result[0].products[0].product_id).toBe(1)
+            expect(result[0].products[0].value).toBe('1.11')
+            expect(result[0].products[1].product_id).toBe(2)
+            expect(result[0].products[1].value).toBe('2.22')
+            expect(result[0].products[2].product_id).toBe(3)
+            expect(result[0].products[2].value).toBe('3.33')
+
+            expect(result[1].total).toBe('36.66')
+        })
+
+        it('not found', async () => {
+            jest.spyOn(orderRepository, 'findOrders').mockResolvedValue([])
+
+            const result = await sut.filterOrders()
+
+            expect(result).toBeUndefined()
+        })
+    })
 })

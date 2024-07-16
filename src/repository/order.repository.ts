@@ -1,7 +1,4 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { Order } from "@src/@types/order";
-import { Product } from "@src/@types/product";
-import { User } from "@src/@types/user";
 import { DBConnection } from "@src/libs/db.connection";
 
 @Injectable()
@@ -62,5 +59,33 @@ export class OrderRepository {
                     productValue: 'order_product.value'
                 })
         }, 'OrderRepository.findOrderById')
+    }
+
+    async findOrders(filters: { orderId?: number, startDate?: Date, endDate?: Date } = {}) {
+        this.logger.debug(`OrderRepository.findOrders :: filtrando pedidos para ${JSON.stringify(filters)}`)
+        const result = this.conn.query((knex) => {
+            const query = knex('orders')
+                .join('users', 'orders.userId', 'users.id')
+                .join('order_product', 'order_product.orderId', 'orders.id')
+                .select({
+                    orderId: 'orders.id',
+                    orderDate: 'orders.date',
+                    userId: 'users.id',
+                    userName: 'users.name',
+                    productId: 'order_product.productId',
+                    productValue: 'order_product.value'
+                })
+
+            if (filters.orderId) {
+                query.where('orders.id', filters.orderId)
+            }
+
+            if (filters.startDate && filters.endDate) {
+                query.whereBetween('orders.date', [filters.startDate, filters.endDate]);
+            }
+
+            return query
+        }, 'OrderRepository.findOrders')
+        return result
     }
 }
