@@ -1,4 +1,4 @@
-import { Product, ProductDTO } from "@src/@types/product"
+import { Product, ProductDTO } from '@src/@types/product'
 
 export class Order {
     id: number
@@ -30,9 +30,9 @@ export class OrderDTO {
     products: ProductDTO[]
 
     private formatDate(d: Date) {
-        const year = d.getFullYear();
-        const month = d.getMonth();
-        const day = d.getDate();
+        const year = d.getFullYear()
+        const month = d.getMonth()
+        const day = d.getDate()
         return `${String(year).padStart(4, '0')}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     }
 
@@ -41,7 +41,7 @@ export class OrderDTO {
         o.order_id = order.id
         o.date = o.formatDate(order.date)
         o.total = order.total.toFixed(2)
-        o.products = order.products.map(p => p.toDTO())
+        o.products = order.products.map((p) => p.toDTO())
         return o
     }
 }

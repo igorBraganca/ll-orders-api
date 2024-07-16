@@ -1,4 +1,4 @@
-import { Order, OrderDTO } from "@src/@types/order"
+import { Order, OrderDTO } from '@src/@types/order'
 
 export class User {
     id: number
@@ -29,7 +29,7 @@ export class UserDTO {
         const u = new UserDTO()
         u.user_id = user.id
         u.name = user.name
-        u.orders = user.orders.map(o => o.toDTO())
+        u.orders = user.orders.map((o) => o.toDTO())
         return u
     }
 }
