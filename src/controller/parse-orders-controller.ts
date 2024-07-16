@@ -4,13 +4,16 @@ import { OrderService } from '@src/service/order.service'
 
 @Controller('orders')
 export class ParseOrdersController {
-    constructor(private readonly orderService: OrderService) {}
+    constructor(private readonly orderService: OrderService) { }
 
     @Post('upload')
     @UseInterceptors(FileInterceptor('orders'))
-    upload(@UploadedFile() orders: Express.Multer.File) {
+    async upload(@UploadedFile() orders: Express.Multer.File) {
         const parsedData = this.orderService.parseFile(orders.buffer)
         const normalizedUsers = this.orderService.normalize(parsedData)
+
+        await this.orderService.persiste(normalizedUsers)
+
         return normalizedUsers.map((u) => u.toDTO())
     }
 }
