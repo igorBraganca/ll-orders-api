@@ -15,12 +15,15 @@ describe('OrderService', () => {
             const result = sut.parseFile(buffer)
 
             expect(result.length).toBe(2352)
-            expect(result[0].userId).toBe(70)
-            expect(result[0].userName).toBe('Palmer Prosacco')
-            expect(result[0].orderId).toBe(753)
-            expect(result[0].prodId).toBe(3)
-            expect(result[0].value).toBe('1836.74')
-            expect(result[0].date).toBe('2021-03-08')
+
+            const firstLine = result[0]
+
+            expect(firstLine.userId).toBe(70)
+            expect(firstLine.userName).toBe('Palmer Prosacco')
+            expect(firstLine.orderId).toBe(753)
+            expect(firstLine.prodId).toBe(3)
+            expect(firstLine.value).toBe('1836.74')
+            expect(firstLine.date).toBe('2021-03-08')
         });
     });
 
@@ -32,7 +35,21 @@ describe('OrderService', () => {
             const data = sut.parseFile(buffer)
             const result = sut.normalize(data)
 
-            console.log(result)
+            expect(result.length).toBe(100)
+
+            const firstUser = result[0]
+            expect(firstUser.id).toBe(1)
+            expect(firstUser.name).toBe('Sammie Baumbach')
+            expect(firstUser.orders.length).toBe(15)
+
+            const firstOrder = firstUser.orders[0]
+            expect(firstOrder.id).toBe(2)
+            expect(firstOrder.date).toBe('2021-10-28')
+            expect(firstOrder.total).toBe(2966.46)
+            expect(firstOrder.products.length).toBe(3)
+            expect(firstOrder.products[0].id).toBe(2)
+            expect(firstOrder.products[1].id).toBe(2)
+            expect(firstOrder.products[2].id).toBe(5)
         });
     });
 });
