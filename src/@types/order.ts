@@ -1,10 +1,12 @@
 import { Product, ProductDTO } from '@src/@types/product'
+import { User, UserDTO } from '@src/@types/user'
 
 export class Order {
     id: number
     total: number
     date: Date
     products: Product[] = []
+    user?: User
 
     constructor(id: number, date: Date, products: Product[] = []) {
         this.id = id
@@ -28,6 +30,7 @@ export class OrderDTO {
     total: string
     date: string
     products: ProductDTO[]
+    user?: UserDTO
 
     private formatDate(d: Date) {
         const year = d.getFullYear()
@@ -42,6 +45,9 @@ export class OrderDTO {
         o.date = o.formatDate(order.date)
         o.total = order.total.toFixed(2)
         o.products = order.products.map((p) => p.toDTO())
+        if (order.user) {
+            o.user = order.user.toDTO()
+        }
         return o
     }
 }

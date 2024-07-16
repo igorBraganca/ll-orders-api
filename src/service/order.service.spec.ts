@@ -1,16 +1,12 @@
-import { ConsoleLogger } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { DBConnection } from '@src/libs/db.connection'
 import { OrderRepository } from '@src/repository/order.repository'
 import { RepositoryModule } from '@src/repository/repository.module'
 import { OrderService } from '@src/service/order.service'
-import { TestHelper } from '@test/utils/test.helper'
 import { readFileSync } from 'fs'
-import { Knex } from 'knex'
 
 let sut: OrderService = null
 let orderRepository: OrderRepository = null
-let conn: DBConnection = null
 
 beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -20,11 +16,8 @@ beforeEach(async () => {
 
     // module.useLogger(new ConsoleLogger());
 
-    conn = module.get<DBConnection>('DEFAULT_CONN')
     orderRepository = module.get<OrderRepository>(OrderRepository)
     sut = module.get<OrderService>(OrderService)
-
-    await TestHelper.cleanDatabase(conn)
 })
 
 afterAll(() => {
@@ -94,5 +87,37 @@ describe('OrderService', () => {
             expect(insertOrUpdateProductsFn).toHaveBeenCalled()
             expect(deleteProductsByOrdersFn).toHaveBeenCalled()
         }, 600000)
+    })
+
+    describe('findOrderById', () => {
+        it('should find an order', async () => {
+            jest.spyOn(orderRepository, 'findOrderById').mockResolvedValue([
+                { orderId: 1, orderDate: new Date(2020, 0, 1), userId: 1, userName: 'teste_1', productId: 1, productValue: 1.11 },
+                { orderId: 1, orderDate: new Date(2020, 0, 1), userId: 1, userName: 'teste_1', productId: 2, productValue: 2.22 },
+                { orderId: 1, orderDate: new Date(2020, 0, 1), userId: 1, userName: 'teste_1', productId: 3, productValue: 3.33 },
+            ])
+
+            const result = await sut.findOrderById(1)
+
+            expect(result.order_id).toBe(1)
+            expect(result.date).toBe('2020-01-01')
+            expect(result.total).toBe('6.66')
+            expect(result.user.user_id).toBe(1)
+            expect(result.user.name).toBe('teste_1')
+            expect(result.products[0].product_id).toBe(1)
+            expect(result.products[0].value).toBe('1.11')
+            expect(result.products[1].product_id).toBe(2)
+            expect(result.products[1].value).toBe('2.22')
+            expect(result.products[2].product_id).toBe(3)
+            expect(result.products[2].value).toBe('3.33')
+        })
+
+        it('not found', async () => {
+            jest.spyOn(orderRepository, 'findOrderById').mockResolvedValue([])
+
+            const result = await sut.findOrderById(1)
+
+            expect(result).toBeUndefined()
+        })
     })
 })

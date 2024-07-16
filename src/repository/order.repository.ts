@@ -37,12 +37,30 @@ export class OrderRepository {
         }, 'OrderRepository.insertOrUpdateProducts')
     }
 
-    async deleteProductsByOrders(ordersId:number[]) {
+    async deleteProductsByOrders(ordersId: number[]) {
         this.logger.debug(`OrderRepository.deleteProductsByOrders :: deletando produtos para pedidos ${JSON.stringify(ordersId)}`)
         await this.conn.query((knex) => {
             return knex('order_product')
                 .delete()
                 .whereIn('orderId', ordersId)
-        }, 'OrderRepository.deleteProductsByOrders')    
+        }, 'OrderRepository.deleteProductsByOrders')
+    }
+
+    async findOrderById(id: number) {
+        this.logger.debug(`OrderRepository.findOrderById :: procurando pedido ${id}`)
+        return this.conn.query((knex) => {
+            return knex('orders')
+                .join('users', 'orders.userId', 'users.id')
+                .join('order_product', 'order_product.orderId', 'orders.id')
+                .where('orders.id', id)
+                .select({
+                    orderId: 'orders.id',
+                    orderDate: 'orders.date',
+                    userId: 'users.id',
+                    userName: 'users.name',
+                    productId: 'order_product.productId',
+                    productValue: 'order_product.value'
+                })
+        }, 'OrderRepository.findOrderById')
     }
 }

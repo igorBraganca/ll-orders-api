@@ -81,4 +81,18 @@ export class OrderService {
         }
         await this.orderRepository.insertOrUpdateProducts(products)
     }
+
+    async findOrderById(orderId: number) {
+        const result = await this.orderRepository.findOrderById(orderId)
+        if (result.length === 0) {
+            return
+        }
+
+        const user = new User(result[0].userId, result[0].userName)
+        const order = new Order(result[0].orderId, result[0].orderDate)
+        order.user = user
+        order.addProducts(...result.map(r => new Product(r.productId, r.productValue)))
+
+        return order.toDTO()
+    }
 }
