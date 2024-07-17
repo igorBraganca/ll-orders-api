@@ -1,16 +1,16 @@
 import * as path from 'path'
 
-const BASE_PATH = path.resolve('../database')
+const BASE_PATH = path.resolve(`${__dirname}/../database`)
 
 export const db = {
     projectDB: {
-        client: 'mysql',
+        client: 'mysql2',
         connection: {
-            host: 'localhost',
-            port: 3306,
-            user: 'root',
-            password: '123456',
-            database: 'orders',
+            host: process.env.DATABASE_HOST || 'localhost',
+            port: process.env.DATABASE_PORT ? Number(process.env.DATABASE_PORT) : 3306,
+            user: process.env.DATABASE_USER || 'root',
+            password: process.env.DATABASE_PASS || '123456',
+            database: process.env.DATABASE || 'orders',
         },
         migrations: {
             directory: path.join(BASE_PATH, 'migrations'),

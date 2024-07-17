@@ -7,7 +7,7 @@ export async function up(knex: Knex): Promise<void> {
 
         table.index(['orderId', 'productId']);
 
-        table.decimal('value').notNullable()
+        table.double('value').notNullable()
     })
 }
 
