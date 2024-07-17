@@ -1,73 +1,57 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Desafio técnico - Vertical Logística
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Esse projeto tem como objetivo resolver o desafio proposto em um processo seletivo.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Modo de uso
 
-## Description
+1. Clonar projeto do github.
+1. Executar o `docker compose up -d --build`
+1. Acessar a api via `http://localhost` nas rotas a seguir:
+    1. POST - `/orders/upload` - rota para carregar os arquivos do sistema legado. Chamar conforme exemplo a seguir com o curl:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+        ```shell
+        # data_1.txt
+        curl -v -F orders=@data/data_1.txt http://localhost/orders/upload
 
-## Installation
+        # data_2.txt
+        curl -v -F orders=@data/data_2.txt http://localhost/orders/upload
+        ```
 
-```bash
-$ npm install
-```
+    1. GET - `/orders/:id` - rota para recuperar os dados de um pedido pelo id
+    1. GET - `/orders` - rota para filtrar os pedidos. Filtros disponíveis:
+        1. `/orders?order_id=1` - filtro pelo id do pedido
+        1. `/orders?start_date=2021-11-01&end_date=2021-11-20` - filtro pela data do pedido
 
-## Running the app
+## Sobre o projeto
 
-```bash
-# development
-$ npm run start
+O projeto foi desenvolvido utilizando o `typescript` e o `nestjs` como framework web.
 
-# watch mode
-$ npm run start:dev
+O typescript foi escolhido por trazer a tipagem ao javascript. Essa abordagem traz mais qualidade ao código, informando ao desenvolvedor o que é esperado e retornado por cada função além de trazer o poder da compilação que consegue prevenir erros no projeto em tempo de código.
 
-# production mode
-$ npm run start:prod
-```
+O nestjs é um framework web que vem ganhando popularidade e traz algumas ferramentas interessantes para um código de boa qualidade, como injeção de dependência, o que possibilita utilizar bons padrões de desenvolvimento.
 
-## Test
+A arquitetura adota no projeto foi a de três camadas: controller, service, repository.
 
-```bash
-# unit tests
-$ npm run test
+1. O controller é responsável por manipular as requisições HTTP. Nessa camada que encontramos o tratamento dos dados recebidos no request, e definimos a resposta. Essa é a camada que o usuário tem acesso. E a partir dela são acessada a camada de service.
 
-# e2e tests
-$ npm run test:e2e
+2. O service é a camada responsável por conter as regras de negócio. Nesse projeto foi onde foi implementado o tratamento dos dados recebidos dos arquivos (data_1 e data_2), além de orquestrar as chamadas para os repositórios. Essa é a camada que faz o meio campo entre controller e repository.
 
-# test coverage
-$ npm run test:cov
-```
+3. A camada repository é onde encontramos a integração com sistemas externos. No caso desse projeto temos a integração com o banco de dados.
 
-## Support
+Essa separação em três camadas melhora a organização do projeto e facilita a manutenção, pois essa arquitetura favorece a adoção dos princípios de responsabilidade única e inversão de dependência.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Esse projeto teve uma adoção baixa de interfaces, pois não senti a necessidade de explorar múltiplas implementação pra nenhuma das possíveis interfaces que o projeto necessitava. Mas caso houvesse alguma necessidade nesse sentido, seria esse o caminho adotado.
 
-## Stay in touch
+### Banco de dados
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Para armazenamento dos dados, foi escolhido o banco de dados mysql, que é um banco robusto e bem testado. Para tal foi adotado a modelagem a seguir:
 
-## License
+![Modelagem do banco de dados](./doc/bd_modelagem.png)
 
-Nest is [MIT licensed](LICENSE).
+### Infra estrutura
+
+Essa versão do projeto está sendo executada através de container orquestrados pelo docker. O projeto está utilizando o `docker compose` para subir os container do mysql, e do app.
+
+Essa abordagem de conteinerização padroniza o ambiente de execução além de facilitar a implantação em ambiente produtivo. Outra vantagem da abordagem de container é isolação que cada container tem em relação aos demais e ao host.
+
+Por fim, foi adicionado o nginx como proxy/loadBalance que faz com que o sistema possa ser escalável além de garantir alta disponibilidade, graças a possibilidade de ter mais de um pod do app.
